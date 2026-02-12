@@ -1,0 +1,14 @@
+name: Dobbie
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Command from Slack: ${{ inputs.command }}"
