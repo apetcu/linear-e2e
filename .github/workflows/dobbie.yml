@@ -11,4 +11,4 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Command from Slack: ${{ inputs.command }}"
+      - run: 'echo "Command from Slack: ${{ github.event.inputs.command }}"'
