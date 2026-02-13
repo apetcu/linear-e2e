@@ -18,12 +18,17 @@ jobs:
       contents: write
       pull-requests: write
       issues: read
+      id-token: write   # ✅ Needed for OIDC token fetching
+
     steps:
+      # Checkout code
       - uses: actions/checkout@v4
 
+      # Install Python dependencies
       - name: Install dependencies
         run: pip install requests
 
+      # Fetch Jira ticket
       - name: Fetch Jira ticket
         id: jira
         env:
@@ -33,12 +38,13 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: python .github/workflows/inspect_ticket.py fetch
 
+      # Fix issue with Claude
       - name: Fix issue with Claude
         if: steps.jira.outputs.found == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GIT_TOKEN }}
+          github_token: ${{ github.token }}   # ✅ Use GitHub-provided token for OIDC
           prompt: |
             You are fixing a Jira ticket in this repository.
 
@@ -52,6 +58,7 @@ jobs:
 
             Analyze the codebase and fix the issue described in the ticket.
 
+      # Comment that ticket has been fixed
       - name: Comment ticket fixed
         if: steps.jira.outputs.found == 'true'
         env:
