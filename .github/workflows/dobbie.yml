@@ -48,6 +48,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--dangerously-skip-permissions'
           prompt: |
             You are fixing a Jira ticket in this repository.
 
@@ -62,8 +63,8 @@ jobs:
             Analyze the codebase and fix the issue described in the ticket.
             Commit the changes on a new branch.
             Create a pull request targeting the main branch.
-            The pull request should be created with the title "SNDY-{{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
-            The pull request should be created with the body "SNDY-{{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
+            The pull request should be created with the title "SNDY-${{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
+            The pull request should be created with the body "SNDY-${{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
 
       # 5️⃣ Comment ticket fixed
       - name: Comment ticket fixed
