@@ -6,9 +6,54 @@ on:
       command:
         required: true
         type: string
+      triggered_by:
+        required: false
+        type: string
+        default: "unknown"
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - run: 'echo "Command from Slack: ${{ github.event.inputs.command }}"'
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch Jira ticket
+        id: jira
+        env:
+          COMMAND: ${{ github.event.inputs.command }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: python inspect_ticket.py fetch
+
+      - name: Fix issue with Claude
+        if: steps.jira.outputs.found == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are fixing a Jira ticket in this repository.
+
+            Ticket: ${{ steps.jira.outputs.ticket }}
+            Summary: ${{ steps.jira.outputs.summary }}
+            Status: ${{ steps.jira.outputs.status }}
+            Description:
+            ${{ steps.jira.outputs.description }}
+
+            ${{ steps.jira.outputs.has_attachments == 'true' && 'Attachments have been saved to ./attachments/ — read them for additional context.' || 'No attachments.' }}
+
+            Analyze the codebase and fix the issue described in the ticket.
+
+      - name: Comment ticket fixed
+        if: steps.jira.outputs.found == 'true'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          python inspect_ticket.py comment \
+            "${{ steps.jira.outputs.ticket }}" \
+            "Ticket fixed (triggered by ${{ github.event.inputs.triggered_by }} via Dobbie)"
