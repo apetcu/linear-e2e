@@ -11,6 +11,11 @@ on:
         type: string
         default: "unknown"
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
