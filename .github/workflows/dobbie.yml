@@ -57,6 +57,7 @@ jobs:
           track_progress: false
           include_fix_links: true
           show_full_output: false
+          allowed_tools: "Edit,Write,Read,Glob,Grep,Bash"
           prompt: |
             You are fixing a Jira ticket in this repository.
 
