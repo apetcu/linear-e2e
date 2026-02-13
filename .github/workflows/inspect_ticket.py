@@ -62,7 +62,30 @@ def set_output(key: str, value: str):
             f.write(f"{key}={value}\n")
 
 
-def add_comment(ticket: str, message: str):
+def add_comment(ticket: str, message: str, link_url: str | None = None):
+    content = [
+        {
+            "type": "paragraph",
+            "content": [{"type": "text", "text": message}],
+        }
+    ]
+    if link_url:
+        content.append(
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Pull Request: ",
+                    },
+                    {
+                        "type": "text",
+                        "text": link_url,
+                        "marks": [{"type": "link", "attrs": {"href": link_url}}],
+                    },
+                ],
+            }
+        )
     requests.post(
         f"{JIRA_BASE_URL}/rest/api/3/issue/{ticket}/comment",
         auth=JIRA_AUTH,
@@ -70,15 +93,39 @@ def add_comment(ticket: str, message: str):
             "body": {
                 "version": 1,
                 "type": "doc",
-                "content": [
-                    {
-                        "type": "paragraph",
-                        "content": [{"type": "text", "text": message}],
-                    }
-                ],
+                "content": content,
             }
         },
     ).raise_for_status()
+
+
+def transition_issue(ticket: str, target_status: str):
+    """Transition a Jira issue to the given status name (e.g. 'In Review')."""
+    resp = requests.get(
+        f"{JIRA_BASE_URL}/rest/api/3/issue/{ticket}/transitions",
+        auth=JIRA_AUTH,
+    )
+    resp.raise_for_status()
+
+    transitions = resp.json().get("transitions", [])
+    transition_id = None
+    for t in transitions:
+        if t["to"]["name"].lower() == target_status.lower():
+            transition_id = t["id"]
+            break
+
+    if not transition_id:
+        available = [f"{t['to']['name']} (id={t['id']})" for t in transitions]
+        print(f"No transition to '{target_status}' found. Available: {available}")
+        sys.exit(1)
+
+    resp = requests.post(
+        f"{JIRA_BASE_URL}/rest/api/3/issue/{ticket}/transitions",
+        auth=JIRA_AUTH,
+        json={"transition": {"id": transition_id}},
+    )
+    resp.raise_for_status()
+    print(f"Transitioned {ticket} to '{target_status}'")
 
 
 def cmd_fetch():
@@ -113,10 +160,17 @@ def cmd_fetch():
 def cmd_comment():
     ticket = sys.argv[2]
     message = sys.argv[3]
-    add_comment(ticket, message)
+    link_url = sys.argv[4] if len(sys.argv) > 4 else None
+    add_comment(ticket, message, link_url)
     print(f"Comment added to {ticket}")
+
+
+def cmd_transition():
+    ticket = sys.argv[2]
+    target_status = sys.argv[3] if len(sys.argv) > 3 else "In Review"
+    transition_issue(ticket, target_status)
 
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "fetch"
-    {"fetch": cmd_fetch, "comment": cmd_comment}[cmd]()
+    {"fetch": cmd_fetch, "comment": cmd_comment, "transition": cmd_transition}[cmd]()

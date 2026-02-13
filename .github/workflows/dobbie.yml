@@ -42,7 +42,19 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: python .github/workflows/inspect_ticket.py fetch
 
-      # 4️⃣ Fix issue with Claude
+      # 4️⃣ Transition ticket to In Progress
+      - name: Transition to In Progress
+        if: steps.jira.outputs.found == 'true'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          python .github/workflows/inspect_ticket.py transition \
+            "${{ steps.jira.outputs.ticket }}" \
+            "In Progress"
+
+      # 5️⃣ Fix issue with Claude
       - name: Fix issue with Claude
         if: steps.jira.outputs.found == 'true'
         uses: anthropics/claude-code-action@v1
@@ -69,7 +81,17 @@ jobs:
             The pull request should be created with the title "SNDY-${{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
             The pull request should be created with the body "SNDY-${{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
 
-      # 5️⃣ Comment ticket fixed
+      # 6️⃣ Find the PR URL
+      - name: Find PR URL
+        if: steps.jira.outputs.found == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_URL=$(gh pr list --state open --limit 1 --search "${{ steps.jira.outputs.ticket }}" --json url --jq '.[0].url // empty')
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      # 7️⃣ Comment ticket fixed with PR link
       - name: Comment ticket fixed
         if: steps.jira.outputs.found == 'true'
         env:
@@ -79,4 +101,17 @@ jobs:
         run: |
           python .github/workflows/inspect_ticket.py comment \
             "${{ steps.jira.outputs.ticket }}" \
-            "Ticket fixed (triggered by ${{ github.event.inputs.triggered_by || github.event.client_payload.triggered_by || 'repository_dispatch' }} via Dobbie)"
+            "Ticket fixed (triggered by ${{ github.event.inputs.triggered_by || github.event.client_payload.triggered_by || 'repository_dispatch' }} via Dobbie)" \
+            "${{ steps.pr.outputs.url }}"
+
+      # 8️⃣ Transition ticket to In Review
+      - name: Transition to In Review
+        if: steps.jira.outputs.found == 'true'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          python .github/workflows/inspect_ticket.py transition \
+            "${{ steps.jira.outputs.ticket }}" \
+            "In Review"
