@@ -27,7 +27,7 @@ jobs:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-        run: python inspect_ticket.py fetch
+        run: python .github/workflows/inspect_ticket.py fetch
 
       - name: Fix issue with Claude
         if: steps.jira.outputs.found == 'true'
@@ -54,6 +54,6 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: |
-          python inspect_ticket.py comment \
+          python .github/workflows/inspect_ticket.py comment \
             "${{ steps.jira.outputs.ticket }}" \
             "Ticket fixed (triggered by ${{ github.event.inputs.triggered_by }} via Dobbie)"
