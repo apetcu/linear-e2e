@@ -46,18 +46,6 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          base_branch: "main"
-          branch_prefix: "dobbie/"
-          use_bedrock: false
-          use_vertex: false
-          use_foundry: false
-          use_sticky_comment: false
-          use_commit_signing: false
-          track_progress: false
-          include_fix_links: true
-          show_full_output: false
-          allowed_tools: "Edit,Write,Read,Glob,Grep,Bash"
           prompt: |
             You are fixing a Jira ticket in this repository.
 
@@ -70,6 +58,11 @@ jobs:
             ${{ steps.jira.outputs.has_attachments == 'true' && 'Attachments have been saved to ./attachments/ — read them for additional context.' || 'No attachments.' }}
 
             Analyze the codebase and fix the issue described in the ticket.
+            Commit the changes to the repository and create a pull request.
+            The pull request should be created on the main branch.
+            The pull request should be created with the title "Fix: ${{ steps.jira.outputs.summary }}"
+            The pull request should be created with the body "Fix: ${{ steps.jira.outputs.summary }}"
+            The pull request should be created with the body "Fix: ${{ steps.jira.outputs.summary }}"
 
       # 5️⃣ Comment ticket fixed
       - name: Comment ticket fixed
