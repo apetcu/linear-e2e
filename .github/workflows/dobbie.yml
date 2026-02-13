@@ -21,6 +21,7 @@ jobs:
       pull-requests: write
       issues: read
       id-token: write
+      workflows: write
 
     steps:
       # 1️⃣ Checkout code
@@ -52,6 +53,9 @@ jobs:
           prompt: |
             You are fixing a Jira ticket in this repository.
 
+            IMPORTANT: Do NOT modify any files in .github/workflows/. Only commit files related to the fix.
+            When committing, only stage the specific files you changed — do not use "git add ." or "git add -A".
+            
             Ticket: ${{ steps.jira.outputs.ticket }}
             Summary: ${{ steps.jira.outputs.summary }}
             Status: ${{ steps.jira.outputs.status }}
