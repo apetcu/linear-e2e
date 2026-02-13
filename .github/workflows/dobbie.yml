@@ -25,6 +25,8 @@ jobs:
     steps:
       # 1️⃣ Checkout code
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       # 2️⃣ Install Python dependencies
       - name: Install dependencies
@@ -58,11 +60,10 @@ jobs:
             ${{ steps.jira.outputs.has_attachments == 'true' && 'Attachments have been saved to ./attachments/ — read them for additional context.' || 'No attachments.' }}
 
             Analyze the codebase and fix the issue described in the ticket.
-            Commit the changes to the repository and create a pull request.
-            The pull request should be created on the main branch.
-            The pull request should be created with the title "Fix: ${{ steps.jira.outputs.summary }}"
-            The pull request should be created with the body "Fix: ${{ steps.jira.outputs.summary }}"
-            The pull request should be created with the body "Fix: ${{ steps.jira.outputs.summary }}"
+            Commit the changes on a new branch.
+            Create a pull request targeting the main branch.
+            The pull request should be created with the title "SNDY-{{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
+            The pull request should be created with the body "SNDY-{{ steps.jira.outputs.ticket }}: ${{ steps.jira.outputs.summary }}"
 
       # 5️⃣ Comment ticket fixed
       - name: Comment ticket fixed
