@@ -310,39 +310,37 @@ export default function InvoicesPage() {
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Upload Invoice File
                 </label>
-                <div className="border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg p-6 text-center">
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer"
-                  >
-                    {file ? (
-                      <div className="text-sm">
-                        <p className="text-zinc-900 dark:text-white font-medium mb-1">
-                          {file.name}
-                        </p>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-xs">
-                          {(file.size / 1024).toFixed(2)} KB
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-zinc-600 dark:text-zinc-400 mb-1">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                          PDF, DOC, or Image files
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="block border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg p-6 text-center cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
+                >
+                  {file ? (
+                    <div className="text-sm">
+                      <p className="text-zinc-900 dark:text-white font-medium mb-1">
+                        {file.name}
+                      </p>
+                      <p className="text-zinc-500 dark:text-zinc-400 text-xs">
+                        {(file.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-zinc-600 dark:text-zinc-400 mb-1">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-500">
+                        PDF, DOC, or Image files
+                      </p>
+                    </div>
+                  )}
+                </label>
               </div>
 
               <div className="flex gap-3">
