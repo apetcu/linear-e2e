@@ -54,6 +54,7 @@ export default function InvoicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const ITEMS_PER_PAGE = 20;
 
@@ -113,6 +114,37 @@ export default function InvoicesPage() {
       console.log('Uploading file:', file.name);
       setIsModalOpen(false);
       setFile(null);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      const droppedFile = files[0];
+      const allowedTypes = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg'];
+      const fileExtension = '.' + droppedFile.name.split('.').pop()?.toLowerCase();
+
+      if (allowedTypes.includes(fileExtension)) {
+        setFile(droppedFile);
+      } else {
+        console.log('File type not supported:', fileExtension);
+      }
     }
   };
 
@@ -310,7 +342,16 @@ export default function InvoicesPage() {
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Upload Invoice File
                 </label>
-                <div className="border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg p-6 text-center">
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    isDragging
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-zinc-300 dark:border-zinc-700'
+                  }`}
+                >
                   <input
                     type="file"
                     onChange={handleFileChange}
