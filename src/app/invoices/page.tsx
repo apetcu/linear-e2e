@@ -358,7 +358,7 @@ export default function InvoicesPage() {
                 <button
                   onClick={handleUpload}
                   disabled={!file}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors duration-200"
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 dark:disabled:bg-zinc-700 disabled:text-zinc-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors duration-200"
                 >
                   Upload
                 </button>
